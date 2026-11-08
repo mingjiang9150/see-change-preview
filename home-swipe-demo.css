@@ -45,7 +45,8 @@ button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:2px so
 .card-head p{margin:2px 0 0;color:var(--muted);font-size:12px;line-height:17px;font-weight:400}
 .detail-link{position:relative;z-index:4;flex:0 0 44px;width:44px;height:44px;margin-top:-2px;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
 .detail-link .icon{width:16px;height:16px}
-.preview-track{position:relative;z-index:3;height:128px;margin:0 0 0 14px;padding-right:14px;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding-left:0;touch-action:pan-y pinch-zoom;scrollbar-width:none}
+.preview-track{position:relative;z-index:3;height:128px;margin:0 0 0 14px;padding-right:14px;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding-left:0;touch-action:auto;scrollbar-width:none}
+.preview-track.is-dragging{scroll-snap-type:none;user-select:none;cursor:grabbing}
 .photo-cell,.summary-media,.add-media{position:relative;flex:0 0 calc((100% - 16px)/2.72);height:128px;margin:0;border-radius:9px;overflow:hidden;scroll-snap-align:start;background:var(--tint)}
 .photo-cell img{width:100%;height:100%;display:block;object-fit:cover}
 .photo-cell img{user-select:none;-webkit-user-drag:none}

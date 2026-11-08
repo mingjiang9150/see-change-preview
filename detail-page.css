@@ -233,18 +233,92 @@ body:has(.detail-overlay){overflow:hidden}
 .detail-dock>.project-function-dock:not(:has(.dock-project-settings)):not(:has(.detail-comparison-modes)){grid-template-columns:1fr;max-width:70px}
 @media(max-width:370px){.detail-dock>.review-dock.project-function-dock{gap:8px}.detail-shell:not(.photo-first) .project-function-dock .detail-comparison-modes{padding:2px;gap:0}.dock-main-actions{padding:5px 2px;gap:0}}
 @media(max-width:330px){.detail-dock>.review-dock.project-function-dock{grid-template-columns:minmax(0,1fr) 44px}.detail-shell:not(.photo-first) .project-function-dock .detail-comparison-modes{grid-column:1/-1;width:116px;justify-self:center}.detail-shell{padding-bottom:calc(158px + env(safe-area-inset-bottom))}}
-.detail-overlay .all-records-sheet{height:92svh;max-height:92svh}
-.all-records-sheet .modal-header{margin-bottom:6px}
-.library-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:12px;color:#909097}
-.library-heading>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.library-heading>button{min-height:44px;padding:0 4px;white-space:nowrap;color:#6650ed;font-size:12px}
-.library-controls{padding-bottom:12px}
-.library-controls .picker-year{margin-bottom:6px}
-.library-empty{display:grid;place-items:center;flex:1;color:#99999f;font-size:14px}
+/* Independent project sheets share the approved visual language. */
+.detail-overlay.project-sheet-overlay{background:#11111238;backdrop-filter:none}
+.detail-overlay .project-sheet{height:68svh;height:68dvh;max-height:calc(100dvh - 16px - env(safe-area-inset-top));display:flex;flex-direction:column;overflow:hidden;padding:12px 22px 0;border-radius:26px 26px 0 0}
+.project-sheet:before{content:'';display:block;flex-shrink:0;align-self:center;width:32px;height:4px;margin:0 0 8px;border-radius:99px;background:#dedee2}
+.detail-overlay .project-sheet .modal-header{flex-shrink:0;min-height:48px;margin:0 0 12px;gap:8px}
+.detail-overlay .project-sheet .modal-header .icon-btn{width:44px;height:44px;background:transparent;color:#757579}
+.detail-overlay .project-sheet .modal-header .icon-btn:hover{background:#f5f5f6;color:#111112}
+.detail-overlay .project-sheet .modal-header .icon-btn .icon{width:20px;height:20px}
+.project-sheet input:focus-visible,.project-sheet select:focus-visible{outline:2px solid #6650ed;outline-offset:2px}
+.project-sheet-footer{flex-shrink:0;padding:14px 0 calc(16px + env(safe-area-inset-bottom));border-top:1px solid #eeeef0;background:#fff}
+.project-sheet-footer>.primary{width:100%;min-height:46px;font-size:14px;border-radius:99px}
+.all-records-sheet .library-controls{display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:48px;padding:0 0 10px;margin:0}
+.library-controls .picker-year{flex-shrink:0;margin:0}
+.library-controls .picker-year select{min-height:44px;max-width:100px;padding:6px 18px 6px 0;font-size:13px;font-weight:500}
+.library-controls .picker-months{min-width:0;flex:1;gap:5px;margin:0;padding:4px}
+.library-controls .picker-months button{min-height:36px;min-width:45px;font-size:12px}
+.library-controls .library-compare-toggle{display:flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;min-width:60px;min-height:44px;padding:0 4px;font-size:13px;color:#6650ed;white-space:nowrap}
+.library-compare-toggle .icon{width:17px;height:17px}
+.library-scroll{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.library-scroll .picker-group{margin:6px 0 24px}
+.library-scroll .picker-group h3{margin-bottom:12px;font-size:13px}
+.library-empty{display:grid;place-items:center;align-content:center;gap:12px;flex:1;color:#757579;font-size:14px;padding-bottom:40px}
+.library-empty .icon{width:36px;height:36px;stroke-width:1.3}
 .library-mark{position:absolute;right:5px;bottom:5px;width:21px;height:21px;border:1.5px solid #ffffffde;border-radius:50%;background:#11111222;display:grid;place-items:center;color:#fff}
 .library-mark.selected{border-color:#fff;background:#6650ed}
 .library-mark .icon{width:12px;height:12px}
-.library-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0 calc(16px + env(safe-area-inset-bottom));border-top:1px solid #eeeef1;font-size:12px;color:#88888f}
-.library-selection-bar button{min-height:44px;padding:0 18px;font-size:13px;border-radius:99px}
-.all-records-sheet .picker-item small{font-size:11px}
-@media(min-width:600px){.detail-overlay .all-records-sheet{height:calc(100svh - 48px)}}
+.library-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:#757579}
+.library-selection-bar>.primary{width:auto;min-width:132px;padding:0 18px;font-size:13px}
+.all-records-sheet .picker-item small{font-size:11px;color:#757579}
+.project-settings-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:6px 4px 20px;margin:0 -4px}
+.project-settings-section{padding:0 0 22px;margin-bottom:20px;border-bottom:1px solid #eeeef0}
+.project-settings-section .project-field-label{display:block;margin:0 0 10px;font-size:13px;font-weight:500;color:#757579;letter-spacing:0}
+.project-settings-section input:not([type=range]),.project-settings-section select{width:100%;min-height:46px;padding:10px 12px;border:1px solid #eeeef0;border-radius:12px;background:#f7f7f8;color:#111112;font-size:16px;box-shadow:none}
+.project-reminder-row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:44px;font-size:15px;font-weight:500}
+.project-reminder-row .switch{position:relative;flex-shrink:0;width:44px;height:28px;min-height:28px;padding:0;border:0;border-radius:99px;background:#e4e4e8;touch-action:manipulation}
+.project-reminder-row .switch:before{content:'';position:absolute;inset:-8px 0}
+.project-reminder-row .switch:after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #11111212;transition:transform .15s}
+.project-reminder-row .switch.on{background:#6650ed}
+.project-reminder-row .switch.on:after{transform:translateX(16px)}
+.project-settings-hint{margin-top:3px;font-size:12px;line-height:1.6;color:#757579}
+.project-reminder-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.project-reminder-fields[hidden]{display:none}
+.project-reminder-fields>div{min-width:0}
+.project-settings-section .project-reminder-fields label{font-size:12px;margin-bottom:8px;font-weight:400}
+.project-settings-section input[type=time]{min-width:0;max-width:100%;-webkit-appearance:none}
+.project-storage-note{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.6;color:#757579}
+.project-storage-note .icon{width:15px;height:15px}
+.project-delete{display:flex;align-items:center;gap:8px;min-height:44px;margin-top:18px;padding:0;color:#a64c4c;font-size:13px}
+.project-delete .icon{width:17px;height:17px}
+.project-settings-scroll .error{margin-top:8px;font-size:12px}
+.project-delete-confirm h3{font-size:20px;margin:10px 0 18px}
+.project-delete-confirm .muted{font-size:14px}
+.project-delete-confirm .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px}
+.project-delete-confirm .danger{border-radius:99px;background:#f9eeee;color:#a64c4c}
+@media(max-width:370px){.detail-overlay .project-sheet{padding-left:18px;padding-right:18px}.library-controls{gap:4px}.library-controls .picker-year select{max-width:89px;font-size:12px}.library-controls .library-compare-toggle{min-width:56px;font-size:12px}.library-controls .picker-months button{min-width:42px}}
+@media(min-width:600px){.detail-overlay .project-sheet{height:68svh;height:68dvh;max-height:680px;margin-bottom:20px;border-radius:24px}}
+.project-sheet .modal-header h2{flex:1;min-width:0;white-space:nowrap}
+.library-view-toggle{display:flex;flex-shrink:0;gap:2px;padding:3px;border-radius:99px;background:#f1f1f4}
+.library-view-toggle button{min-width:48px;min-height:36px;padding:0 10px;border-radius:99px;font-size:12px;color:#757579}
+.library-view-toggle button.active{background:#fff;color:#111112;box-shadow:0 1px 3px #11111209}
+.library-date-controls{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.library-date-control{display:block;min-width:0}
+.project-sheet .library-date-control select{width:auto;min-width:80px;min-height:40px;padding:8px 12px;border:0;border-radius:99px;background:#f5f5f6;font-size:13px;font-weight:500;line-height:20px;color:#44444b;cursor:pointer}
+.project-sheet .library-date-control:first-child select{min-width:100px}
+.library-weekdays,.library-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.library-weekdays{margin-bottom:7px;color:#757579;font-size:11px;text-align:center;line-height:26px}
+.library-calendar-cell{position:relative;min-width:0;aspect-ratio:.74;border-radius:8px;padding:0;background:#f5f5f6;overflow:hidden}
+.library-calendar-cell .photo-media,.library-calendar-cell img{display:block;width:100%;height:100%;object-fit:cover}
+.calendar-day-number{position:absolute;left:3px;top:3px;min-width:17px;padding:1px 3px;border-radius:4px;font-size:10px;line-height:14px;text-align:center;background:#ffffffdb;color:#111112;font-variant-numeric:tabular-nums}
+.library-calendar-cell.is-empty{background:#fafafa}
+.library-calendar-cell.is-empty .calendar-day-number{inset:5px 0 auto;background:none;color:#a0a0a5}
+.calendar-day-count{position:absolute;right:3px;bottom:3px;min-width:16px;padding:1px 3px;border-radius:4px;background:#111112b3;color:#fff;font-size:9px;line-height:12px;text-align:center}
+.library-calendar-cell.is-open{outline:2px solid #111112;outline-offset:1px}
+.library-calendar-cell.has-selection{outline:2px solid #6650ed;outline-offset:1px}
+.calendar-day-selected{position:absolute;right:2px;top:2px;width:16px;height:16px;border:1px solid #fff;background:#6650ed;border-radius:50%;display:grid;place-items:center;color:#fff}
+.calendar-day-selected .icon{width:10px;height:10px}
+.library-day-records{margin:16px 0 2px;padding:10px 0 0;border-top:1px solid #eeeef0}
+.library-day-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.library-day-heading h4{margin:0;font-size:13px;font-weight:550}
+.library-day-heading h4 span{margin-left:8px;color:#757579;font-size:11px;font-weight:400}
+.library-day-heading button{width:40px;height:40px;padding:0;display:grid;place-items:center;color:#757579}
+.library-day-heading .icon{width:16px;height:16px}
+.library-day-records .picker-date{display:none}
+.library-day-records .picker-item small{margin-top:7px}
+.is-calendar .picker-group{margin-bottom:26px}
+@media(max-width:370px){.project-sheet .modal-header{gap:4px}.project-sheet .modal-header h2{font-size:17px}.library-view-toggle button{min-width:44px;padding:0 8px}.library-date-controls{gap:6px}.project-sheet .library-date-control select{min-width:72px;padding:8px 9px;font-size:12px}.project-sheet .library-date-control:first-child select{min-width:91px}.library-weekdays,.library-calendar-grid{gap:3px}}
+/* Calendar density belongs beside the date controls; it adds no toolbar row. */
+@media(max-width:400px){.library-controls:has(.library-density-control) .library-date-controls{gap:6px}.project-sheet .library-controls:has(.library-density-control) .library-date-control select{min-width:64px;padding:8px 9px;font-size:12px}.project-sheet .library-controls:has(.library-density-control) .library-date-control:first-child select{min-width:90px}}
+@media(max-width:370px){.all-records-sheet .library-controls:has(.library-density-control){gap:4px}.library-controls:has(.library-density-control) .library-compare-toggle{min-width:44px;padding:0}.library-controls:has(.library-density-control) .library-compare-label{display:none}}

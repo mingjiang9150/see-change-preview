@@ -1,15 +1,17 @@
 import {resolvePair,recordMonths} from './detail-model.js';
 import {dayGap} from './core.js';
+import {photoCalendarMonth} from './photo-calendar.js?v=calendar-weeks-14';
 import {recordCalendar,recordYears,calendarMarkup} from './record-calendar.js';
 export function createDetailPage(api){
-  const {current,records,esc,icon,photo,fmt,time,modal,closeModal,refresh}=api;
+  const {current,records,esc,icon,photo,fmt,time,modal,projectSheet,closeModal,refresh}=api;
   const photoFirst=api.photoFirst===true;
   const choices=new Map(),modes=new Map(),splitPositions=new Map();
   let splitDrag=null;
   const calendarOpen=new Set(),calendarYears=new Map();
   let reviewMode=false,reviewTimer=null;
   let pickerSide=0,pickerYear='',observer=null,viewerIndex=0,viewerPair=[],scale=1,panX=0,panY=0;
-  let libraryMonth='',libraryScroll=0,librarySelecting=false,librarySelection=[],viewerFromLibrary=false;
+  const libraryViews=new Map(),calendarDensities=new Map();
+  let libraryCalendarDensity='full',libraryAnchorMonth='',libraryView='photos',libraryDay='',libraryMonth='',libraryScroll=0,librarySelecting=false,librarySelection=[],viewerFromLibrary=false;
   const pointers=new Map();let gesture=null,pinched=false,restoreFocus=null;
   const pair=()=>{const rows=records(),choice=choices.get(current().id);if(choice?.some(id=>!rows.some(r=>r.id===id)))choices.delete(current().id);return resolvePair(rows,choices.get(current().id));};
   const label=r=>new Date(r.date).toLocaleDateString('zh-CN',{month:'long',day:'numeric'});
@@ -104,15 +106,60 @@ export function createDetailPage(api){
   }
   function setMonth(month){document.querySelectorAll('.picker-months button').forEach(b=>{b.classList.toggle('active',b.dataset.month===month);b.setAttribute('aria-pressed',String(b.dataset.month===month));});document.querySelector('.picker-months .active')?.scrollIntoView({inline:'nearest',block:'nearest',behavior:'instant'});}
   function choose(id){const chosen=pair();if(chosen[1-pickerSide]?.id===id)return;if(chosen[pickerSide]?.id===id){closeModal();return;}chosen[pickerSide]=records().find(r=>r.id===id);choices.set(current().id,chosen.map(r=>r.id));closeModal();refresh();(document.querySelector('.photo-pick[data-side="'+pair().findIndex(r=>r.id===id)+'"]')||document.querySelector('.pair-date'))?.focus();}
-  function library(){librarySelecting=false;librarySelection=[];libraryMonth=records().at(-1)?.date.slice(0,7)||'';libraryScroll=0;drawLibrary();}
-  function libraryControls(){const rows=records(),years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort().reverse(),year=libraryMonth.slice(0,4),months=recordMonths(rows,year).reverse();return `<label class="picker-year">${icon('calendar')}<select id="library-year" aria-label="跳转到年份">${years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('')}</select></label><nav class="picker-months" aria-label="跳转到月份">${months.map(m=>`<button data-detail="library-month" data-month="${m}" class="${m===libraryMonth?'active':''}" aria-pressed="${m===libraryMonth}">${Number(m.slice(5))} 月</button>`).join('')}</nav>`;}
+  function library(){libraryCalendarDensity=calendarDensities.get(current().id)||'full';libraryAnchorMonth='';libraryView=libraryViews.get(current().id)||'photos';libraryDay='';librarySelecting=false;librarySelection=[];libraryMonth=records().at(-1)?.date.slice(0,7)||'';libraryScroll=0;drawLibrary();}
+  function libraryViewControls(){return `<div class="library-view-toggle" role="group" aria-label="记录展示方式"><button data-detail="library-layout" data-layout="photos" aria-pressed="${libraryView==='photos'}" class="${libraryView==='photos'?'active':''}">照片</button><button data-detail="library-layout" data-layout="calendar" aria-pressed="${libraryView==='calendar'}" class="${libraryView==='calendar'?'active':''}">日历</button></div>`;}
+  function libraryControls(){
+    const rows=records(),years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort().reverse(),year=libraryMonth.slice(0,4),months=recordMonths(rows,year).reverse();
+    return `<div class="library-date-controls"><label class="library-date-control"><select id="library-year" aria-label="跳转到年份">${years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('')}</select></label><label class="library-date-control"><select id="library-month" aria-label="跳转到月份">${months.map(m=>`<option value="${m}" ${m===libraryMonth?'selected':''}>${Number(m.slice(5))} 月</option>`).join('')}</select></label>${libraryView==='calendar'?`<label class="library-date-control library-density-control"><select id="library-calendar-density" aria-label="日历展示模式"><option value="compact" ${libraryCalendarDensity==='compact'?'selected':''}>缩略</option><option value="full" ${libraryCalendarDensity==='full'?'selected':''}>完整</option></select></label>`:''}</div>${rows.length>1?`<button class="library-compare-toggle" data-detail="library-select" aria-label="${librarySelecting?'取消选择':'选照片对比'}" aria-pressed="${librarySelecting}">${librarySelecting?'取消':icon('side-by-side')+'<span class="library-compare-label">对比</span>'}</button>`:''}`;
+  }
+  function syncLibraryControls(){
+    const year=document.querySelector('#library-year'),month=document.querySelector('#library-month');if(!year||!month)return;
+    year.value=libraryMonth.slice(0,4);
+    const months=recordMonths(records(),year.value).reverse();
+    if([...month.options].map(o=>o.value).join()!==months.join())month.innerHTML=months.map(m=>`<option value="${m}">${Number(m.slice(5))} 月</option>`).join('');
+    month.value=libraryMonth;
+  }
+  function jumpLibraryMonth(month){libraryAnchorMonth=month;libraryMonth=month;syncLibraryControls();document.querySelector(`#library-${month}`)?.scrollIntoView({block:'start',behavior:'instant'});}
+  function libraryPhoto(r){return `<button data-detail="${librarySelecting?'library-choose':'library-view'}" data-id="${esc(r.id)}" class="picker-item ${librarySelection.includes(r.id)?'selected':''}" aria-label="${librarySelecting?'选择':'查看'}${fmt(r.date,true)} ${time(r.date)}" ${librarySelecting?`aria-pressed="${librarySelection.includes(r.id)}"`:''}><span class="picker-thumb">${photo(r,'loading="lazy"')}${librarySelecting?`<span class="library-mark ${librarySelection.includes(r.id)?'selected':''}">${librarySelection.includes(r.id)?icon('check'):''}</span>`:''}</span><span class="picker-date">${label(r)}</span><small>${time(r.date)}</small></button>`;}
+  function libraryCalendar(month,rows){
+    const {cells}=photoCalendarMonth(rows,month,{compact:libraryCalendarDensity==='compact'}),dayRows=rows.filter(r=>r.date.slice(0,10)===libraryDay);
+    return `<div class="library-weekdays" aria-hidden="true">${['一','二','三','四','五','六','日'].map(day=>`<span>${day}</span>`).join('')}</div><div class="library-calendar-grid" aria-label="${month.slice(0,4)} 年 ${Number(month.slice(5))} 月日历">${cells.map(day=>{
+      if(!day)return '<span class="library-calendar-pad" aria-hidden="true"></span>';
+      if(!day.records.length)return `<span class="library-calendar-cell is-empty"><span class="calendar-day-number">${day.day}</span></span>`;
+      const selected=day.records.filter(r=>librarySelection.includes(r.id)).length;
+      return `<button class="library-calendar-cell has-records ${libraryDay===day.date?'is-open':''} ${selected?'has-selection':''}" data-detail="library-day" data-date="${day.date}" aria-label="${fmt(day.date+'T12:00',true)}，${day.records.length} 张照片${selected?'，已选 '+selected+' 张':''}" aria-expanded="${libraryDay===day.date}" aria-controls="library-day-${day.date}">${photo(day.records.at(-1),'loading="lazy"')}<span class="calendar-day-number">${day.day}</span>${day.records.length>1?`<span class="calendar-day-count">${day.records.length}</span>`:''}${selected?`<span class="calendar-day-selected">${icon('check')}</span>`:''}</button>`;
+    }).join('')}</div>${libraryDay.startsWith(month)&&dayRows.length?`<section class="library-day-records" id="library-day-${libraryDay}" aria-label="${fmt(libraryDay+'T12:00',true)}的照片"><div class="library-day-heading"><h4>${Number(libraryDay.slice(5,7))} 月 ${Number(libraryDay.slice(8))} 日<span>${dayRows.length} 张</span></h4><button data-detail="library-day-close" aria-label="收起当天照片">${icon('close')}</button></div><div class="picker-grid">${dayRows.map(libraryPhoto).join('')}</div></section>`:''}`;
+  }
   function drawLibrary(restore=false){
     cleanup();viewerFromLibrary=false;
     const rows=records(),months=[...new Set(rows.map(r=>r.date.slice(0,7)))].sort().reverse();
-    sheet('全部记录',`<div class="library-heading"><span>${esc(current().name)}</span>${rows.length>1?`<button data-detail="library-select">${librarySelecting?'取消选择':'选照片对比'}</button>`:''}</div>${rows.length?`<div class="picker-controls library-controls">${libraryControls()}</div><div class="picker-scroll library-scroll">${months.map(m=>`<section class="picker-group" data-month="${m}" id="library-${m}"><h3>${Number(m.slice(5))} 月<span>${m.slice(0,4)}</span></h3><div class="picker-grid">${rows.filter(r=>r.date.startsWith(m)).reverse().map(r=>`<button data-detail="${librarySelecting?'library-choose':'library-view'}" data-id="${esc(r.id)}" class="picker-item ${librarySelection.includes(r.id)?'selected':''}" aria-label="${librarySelecting?'选择':'查看'}${fmt(r.date,true)} ${time(r.date)}" ${librarySelecting?`aria-pressed="${librarySelection.includes(r.id)}"`:''}><span class="picker-thumb">${photo(r,'loading="lazy"')}${librarySelecting?`<span class="library-mark ${librarySelection.includes(r.id)?'selected':''}">${librarySelection.includes(r.id)?icon('check'):''}</span>`:''}</span><span class="picker-date">${label(r)}</span><small>${time(r.date)}</small></button>`).join('')}</div></section>`).join('')}</div>${librarySelecting?`<div class="library-selection-bar"><span aria-live="polite">${librarySelection.length===2?'已选 2 张':librarySelection.length===1?'再选 1 张':'选择 2 张照片'}</span><button class="secondary" data-detail="library-compare" ${librarySelection.length!==2?'disabled':''}>对比这两张</button></div>`:''}`:'<div class="library-empty">还没有照片记录</div>'}`,'photo-picker-sheet all-records-sheet');
+    projectSheet('library',`${rows.length?`<div class="picker-controls library-controls">${libraryControls()}</div><div class="picker-scroll library-scroll ${libraryView==='calendar'?'is-calendar':''}">${months.map(m=>`<section class="picker-group" data-month="${m}" id="library-${m}"><h3>${Number(m.slice(5))} 月<span>${m.slice(0,4)}</span></h3>${libraryView==='calendar'?libraryCalendar(m,rows):`<div class="picker-grid">${rows.filter(r=>r.date.startsWith(m)).reverse().map(libraryPhoto).join('')}</div>`}</section>`).join('')}</div>${librarySelecting?`<footer class="library-selection-bar project-sheet-footer"><span aria-live="polite">${librarySelection.length===2?'已选 2 张':librarySelection.length===1?'再选 1 张':'选择 2 张照片'}</span><button class="primary" data-detail="library-compare" ${librarySelection.length!==2?'disabled':''}>对比这两张</button></footer>`:''}`:`<div class="library-empty">${icon('empty-photo')}<p>还没有照片记录</p></div>`}`,{headerActions:libraryViewControls()});
     const root=document.querySelector('.library-scroll');if(!root)return;
-    if(restore)root.scrollTop=libraryScroll;
-    observer=new IntersectionObserver(()=>{const bounds=root.getBoundingClientRect(),visible=[...root.querySelectorAll('.picker-group')].find(el=>el.getBoundingClientRect().bottom>bounds.top+24);if(visible&&visible.dataset.month!==libraryMonth){libraryMonth=visible.dataset.month;document.querySelector('.library-controls').innerHTML=libraryControls();}},{root,threshold:[0,.1,.5,1]});root.querySelectorAll('.picker-group').forEach(el=>observer.observe(el));
+    if(restore){libraryAnchorMonth=libraryMonth;root.scrollTop=libraryScroll;}
+    // Keep explicit month jumps stable even when the final sparse month cannot reach the top.
+    const followScroll=()=>{libraryAnchorMonth='';};
+    root.addEventListener('wheel',followScroll,{passive:true});
+    root.addEventListener('touchstart',followScroll,{passive:true});
+    root.addEventListener('pointerdown',followScroll);
+    root.addEventListener('keydown',e=>{if(['Tab','ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key))followScroll();});
+    observer=new IntersectionObserver(()=>{if(libraryAnchorMonth)return;const bounds=root.getBoundingClientRect(),visible=[...root.querySelectorAll('.picker-group')].find(el=>el.getBoundingClientRect().bottom>bounds.top+24);if(visible&&visible.dataset.month!==libraryMonth){libraryMonth=visible.dataset.month;syncLibraryControls();}},{root,threshold:[0,.1,.5,1]});root.querySelectorAll('.picker-group').forEach(el=>observer.observe(el));
+  }
+  function setLibraryView(view){
+    if(!['photos','calendar'].includes(view)||view===libraryView)return;
+    const month=libraryMonth;libraryView=view;libraryViews.set(current().id,view);drawLibrary();jumpLibraryMonth(month);
+    document.querySelector(`[data-detail="library-layout"][data-layout="${view}"]`)?.focus({preventScroll:true});
+  }
+  function setCalendarDensity(density){
+    if(!['compact','full'].includes(density)||density===libraryCalendarDensity)return;
+    const month=libraryMonth;libraryCalendarDensity=density;calendarDensities.set(current().id,density);
+    drawLibrary();jumpLibraryMonth(month);
+    const control=document.querySelector('#library-calendar-density');
+    setTimeout(()=>{if(control?.isConnected)control.focus({preventScroll:true});},0);
+  }
+  function openLibraryDay(date){
+    libraryScroll=document.querySelector('.library-scroll').scrollTop;libraryMonth=date.slice(0,7);libraryDay=libraryDay===date?'':date;drawLibrary(true);
+    if(libraryDay)document.querySelector('.library-day-records')?.scrollIntoView({block:'nearest',behavior:'instant'});
+    document.querySelector(`[data-detail="library-day"][data-date="${date}"]`)?.focus({preventScroll:true});
   }
   function selectLibraryPhoto(id){libraryScroll=document.querySelector('.library-scroll').scrollTop;if(librarySelection.includes(id))librarySelection=librarySelection.filter(x=>x!==id);else if(librarySelection.length<2)librarySelection.push(id);drawLibrary(true);document.querySelector(`[data-detail="library-choose"][data-id="${id}"]`)?.focus();}
   function compareLibrary(){if(librarySelection.length!==2)return;choices.set(current().id,[...librarySelection]);closeModal();refresh();document.querySelector('[data-detail="library"]')?.focus();}
@@ -125,11 +172,11 @@ export function createDetailPage(api){
   function playback(){if(reviewTimer){clearInterval(reviewTimer);reviewTimer=null;drawViewer();return;}if(viewerIndex===viewerPair.length-1)viewerIndex=0;reviewTimer=setInterval(()=>{if(viewerIndex>=viewerPair.length-1){clearInterval(reviewTimer);reviewTimer=null;drawViewer();}else switchViewer(viewerIndex+1);},1400);drawViewer();}
   function startReview(){cleanup();viewerFromLibrary=false;reviewMode=true;viewerPair=records();viewerIndex=0;scale=1;panX=panY=0;drawViewer();playback();}
   function toggleZoom(){scale=scale>1?1:2;panX=panY=0;applyTransform();const b=document.querySelector('[data-detail=zoom]');b.innerHTML=icon(scale>1?'fit':'zoom-in');b.setAttribute('aria-label',scale>1?'还原照片':'放大照片');}
-  const handlers={'calendar-toggle':toggleCalendar,'calendar-close':closeCalendar,library,'library-select':()=>{libraryScroll=document.querySelector('.library-scroll').scrollTop;librarySelecting=!librarySelecting;librarySelection=[];drawLibrary(true);},'library-choose':el=>selectLibraryPhoto(el.dataset.id),'library-compare':compareLibrary,'library-view':el=>viewLibrary(el.dataset.id),'library-month':el=>{libraryMonth=el.dataset.month;document.querySelector('.library-controls').innerHTML=libraryControls();document.querySelector(`#library-${libraryMonth}`)?.scrollIntoView({block:'start',behavior:'smooth'});},mode:el=>setMode(el.dataset.mode),playback,'viewer-prev':()=>switchViewer(viewerIndex-1),'viewer-next':()=>switchViewer(viewerIndex+1),'save-name':async()=>{const name=document.querySelector('#detail-name').value.trim();if(!name){document.querySelector('#modal-error').textContent='请输入项目名称。';return}if(await api.rename(name)){closeModal();refresh();}},pick:el=>picker(el.dataset.side),month:el=>{document.querySelector(`#month-${el.dataset.month}`)?.scrollIntoView({block:'start',behavior:'smooth'});setMonth(el.dataset.month)},choose:el=>choose(el.dataset.id),reset:()=>{choices.delete(current().id);refresh();},view:el=>view(el.dataset.side),'viewer-switch':el=>switchViewer(el.dataset.side),zoom:toggleZoom,edit:()=>{viewerFromLibrary=false;closeModal();api.edit();}};
+  const handlers={'calendar-toggle':toggleCalendar,'calendar-close':closeCalendar,library,'library-select':()=>{libraryScroll=document.querySelector('.library-scroll').scrollTop;librarySelecting=!librarySelecting;librarySelection=[];drawLibrary(true);},'library-choose':el=>selectLibraryPhoto(el.dataset.id),'library-compare':compareLibrary,'library-view':el=>viewLibrary(el.dataset.id),'library-layout':el=>setLibraryView(el.dataset.layout),'library-day':el=>openLibraryDay(el.dataset.date),'library-day-close':()=>openLibraryDay(libraryDay),mode:el=>setMode(el.dataset.mode),playback,'viewer-prev':()=>switchViewer(viewerIndex-1),'viewer-next':()=>switchViewer(viewerIndex+1),'save-name':async()=>{const name=document.querySelector('#detail-name').value.trim();if(!name){document.querySelector('#modal-error').textContent='请输入项目名称。';return}if(await api.rename(name)){closeModal();refresh();}},pick:el=>picker(el.dataset.side),month:el=>{document.querySelector(`#month-${el.dataset.month}`)?.scrollIntoView({block:'start',behavior:'smooth'});setMonth(el.dataset.month)},choose:el=>choose(el.dataset.id),reset:()=>{choices.delete(current().id);refresh();},view:el=>view(el.dataset.side),'viewer-switch':el=>switchViewer(el.dataset.side),zoom:toggleZoom,edit:()=>{viewerFromLibrary=false;closeModal();api.edit();}};
   document.addEventListener('click',async e=>{const el=e.target.closest('[data-detail]');if(el&&!el.disabled&&!api.busy())await handlers[el.dataset.detail]?.(el);});
   document.addEventListener('load',e=>{if(e.target.matches?.('.photo-open img'))placePhotoTags();},true);
   window.addEventListener('resize',()=>requestAnimationFrame(placePhotoTags));
-  document.addEventListener('change',e=>{if(e.target.id==='record-calendar-year'){calendarYears.set(current().id,Number(e.target.value));refresh();document.querySelector('#record-calendar-year')?.focus();}if(e.target.id==='library-year'){libraryMonth=recordMonths(records(),e.target.value).at(-1);document.querySelector('.library-controls').innerHTML=libraryControls();document.querySelector(`#library-${libraryMonth}`)?.scrollIntoView({block:'start',behavior:'instant'});}if(e.target.id==='picker-year'){pickerYear=e.target.value;drawPicker(recordMonths(records(),pickerYear)[0]);}});
+  document.addEventListener('change',e=>{if(e.target.id==='record-calendar-year'){calendarYears.set(current().id,Number(e.target.value));refresh();document.querySelector('#record-calendar-year')?.focus();}if(e.target.id==='library-year')jumpLibraryMonth(recordMonths(records(),e.target.value).at(-1));if(e.target.id==='library-month')jumpLibraryMonth(e.target.value);if(e.target.id==='library-calendar-density')setCalendarDensity(e.target.value);if(e.target.id==='picker-year'){pickerYear=e.target.value;drawPicker(recordMonths(records(),pickerYear)[0]);}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&calendarOpen.has(current()?.id)&&!document.querySelector('#modal-root .modal')){e.preventDefault();closeCalendar();}});
   document.addEventListener('dblclick',e=>{if(e.target.closest('.viewer-stage'))toggleZoom();});
   document.addEventListener('keydown',e=>{

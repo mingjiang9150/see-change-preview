@@ -279,44 +279,44 @@ function closeProject(){
 }
 
 let gesture=null;
+const skipOpenUntil=new WeakMap();
+function finishGesture(event){
+  if(!gesture||event.pointerId!==gesture.pointerId)return;
+  const {card,track,dragged,scroll,pointerId}=gesture;
+  if(dragged||Math.abs((track?.scrollLeft||0)-scroll)>4){
+    skipOpenUntil.set(card,performance.now()+500);
+  }
+  gesture=null;
+  track?.classList.remove('is-dragging');
+  if(track?.hasPointerCapture(pointerId))track.releasePointerCapture(pointerId);
+}
 document.addEventListener('pointerdown',event=>{
+  if(!event.isPrimary||(event.pointerType==='mouse'&&event.button!==0))return;
   const track=event.target.closest('.preview-track');
   const card=event.target.closest('[data-project-card]');
   if(!card||event.target.closest('button:not(.summary-media)'))return;
-  gesture={card,track,x:event.clientX,y:event.clientY,scroll:track?.scrollLeft||0,dragged:false,direction:null,pointerId:event.pointerId};
+  skipOpenUntil.delete(card);
+  gesture={card,track,x:event.clientX,y:event.clientY,scroll:track?.scrollLeft||0,dragged:false,direction:null,pointerId:event.pointerId,mouse:event.pointerType==='mouse'};
 });
 document.addEventListener('pointermove',event=>{
-  if(!gesture)return;
+  if(!gesture||event.pointerId!==gesture.pointerId)return;
   const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
-  if(!gesture.direction&&Math.hypot(dx,dy)>=10){
+  if(Math.hypot(dx,dy)>=10)gesture.dragged=true;
+  if(!gesture.direction&&gesture.dragged){
     if(Math.abs(dx)>=Math.abs(dy)*1.25)gesture.direction='x';
     else if(Math.abs(dy)>=Math.abs(dx)*1.25)gesture.direction='y';
   }
-  if(gesture.direction==='x'&&gesture.track){
-    gesture.dragged=true;
-    gesture.track.setPointerCapture?.(gesture.pointerId);
+  // Touch/pen keep native scrolling, momentum and pinch zoom. Only mouse needs dragging.
+  if(gesture.mouse&&gesture.direction==='x'&&gesture.track&&gesture.track.scrollWidth>gesture.track.clientWidth){
+    gesture.track.classList.add('is-dragging');
+    gesture.track.setPointerCapture(gesture.pointerId);
     event.preventDefault();
     gesture.track.scrollLeft=gesture.scroll-dx;
   }
 });
-document.addEventListener('pointerup',()=>{
-  if(!gesture)return;
-  const moved=gesture.dragged||Math.abs((gesture.track?.scrollLeft||0)-gesture.scroll)>4;
-  if(gesture.direction==='x'&&gesture.track){
-    const cells=[...gesture.track.querySelectorAll('.photo-cell,.summary-media')];
-    if(cells.length){
-      const nearest=cells.reduce((best,cell,index)=>Math.abs(cell.offsetLeft-gesture.track.scrollLeft)<Math.abs(cells[best].offsetLeft-gesture.track.scrollLeft)?index:best,0);
-      gesture.track.scrollTo({left:cells[nearest].offsetLeft,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-    }
-  }
-  if(moved){
-    const card=gesture.card;
-    card.dataset.skipOpen='true';
-    setTimeout(()=>delete card.dataset.skipOpen,80);
-  }
-  gesture=null;
-});
-document.addEventListener('pointercancel',()=>{gesture=null;});
+document.addEventListener('pointerup',finishGesture);
+document.addEventListener('pointercancel',finishGesture);
+document.addEventListener('lostpointercapture',finishGesture);
 
 document.addEventListener('scroll',event=>{
   const track=event.target.closest?.('.preview-track');
@@ -343,11 +343,11 @@ document.addEventListener('click',event=>{
   if(event.target.closest('[data-camera-global]')){if(productAction('quick-capture'))return;return showToast('选择项目后开始拍摄');}
   const opener=event.target.closest('[data-open-project]');
   if(opener){
-    if(opener.closest('[data-project-card]')?.dataset.skipOpen)return;
+    if(performance.now()<(skipOpenUntil.get(opener.closest('[data-project-card]'))||0))return;
     return openProject(opener.dataset.openProject);
   }
   const card=event.target.closest('[data-project-card]');
-  if(card&&!card.dataset.skipOpen)return openProject(card.dataset.projectCard);
+  if(card&&performance.now()>=(skipOpenUntil.get(card)||0))return openProject(card.dataset.projectCard);
 });
 
 document.addEventListener('input',event=>{
