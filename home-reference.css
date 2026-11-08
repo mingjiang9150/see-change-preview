@@ -1,0 +1,73 @@
+/* White, graphite and violet. Optional palette studies keep their own colors. */
+html:not([data-palette]){
+  --bg-top:#fff;--bg-bottom:#fff;--ink:#111112;--muted:#757579;
+  --card:#fff;--tint:#f5f5f6;--tint-deep:#eeeef0;
+  --glass:rgba(255,255,255,.9);--line:#e6e6e8;
+  --accent:#6650ed;--accent-soft:#f0ecff;--icon-cutout:#fff;
+  background:#f1f1f2;
+}
+html:not([data-palette]) body{background:#f1f1f2}
+html:not([data-palette]) button:focus-visible,
+html:not([data-palette]) [tabindex]:focus-visible,
+html:not([data-palette]) input:focus-visible{outline-color:var(--accent)}
+html:not([data-palette]) .phone-shell{background:#fff}
+html:not([data-palette]) .home-header{padding:calc(24px + env(safe-area-inset-top)) 24px 8px}
+html:not([data-palette]) .headline h1{font-size:24px;line-height:34px;font-weight:600;letter-spacing:-.5px}
+html:not([data-palette]) .header-actions{gap:6px}
+html:not([data-palette]) .header-actions button{border-radius:50%}
+html:not([data-palette]) .header-actions button:hover{background:var(--tint)}
+html:not([data-palette]) .section-title{padding:0 20px 12px 24px}
+html:not([data-palette]) .view-switch{gap:0;padding:2px;border:1px solid var(--line);border-radius:25px}
+html:not([data-palette]) .view-switch button{width:44px;height:40px;border-radius:22px}
+html:not([data-palette]) .view-switch button[aria-pressed="true"]{color:var(--accent);background:var(--tint-deep)}
+html:not([data-palette]) .project-list{padding:0 24px 108px}
+html:not([data-palette]) .project-card{background:transparent;border-radius:0;padding:8px 0 14px;min-height:242px;margin-bottom:16px;border-bottom:1px solid #eeeef0;contain-intrinsic-size:242px}
+html:not([data-palette]) .card-head{height:50px;padding:0 0 12px}
+html:not([data-palette]) .card-head h2{font-size:18px;line-height:25px;font-weight:600}
+html:not([data-palette]) .card-head p{font-size:12px;line-height:18px;margin-top:2px}
+html:not([data-palette]) .detail-link{margin-right:-12px}
+html:not([data-palette]) .preview-track{margin:0;padding:0;height:140px;gap:6px}
+html:not([data-palette]) .photo-cell,
+html:not([data-palette]) .summary-media,
+html:not([data-palette]) .add-media{height:140px;border-radius:12px;flex-basis:calc((100% - 12px)/2.72)}
+html:not([data-palette]) .card-foot{height:30px;padding:10px 0 0;font-size:12px}
+html:not([data-palette]) .project-card.is-single .photo-cell{flex-basis:43%}
+html:not([data-palette]) .project-card.is-single .add-media{flex-basis:calc(57% - 6px)}
+html:not([data-palette]) .project-card.is-double .photo-cell{flex-basis:calc((100% - 6px)/2)}
+html:not([data-palette]) .empty-media{margin:0;width:100%;height:140px;border-radius:12px;border:1px solid var(--line)}
+html:not([data-palette]) .project-list.is-grid{padding-top:18px;gap:30px 12px}
+html:not([data-palette]) .tile-stack{margin-bottom:12px}
+html:not([data-palette]) .stack-photo{inset:5px 8%;width:84%;height:calc(100% - 10px);border:2px solid #fff;border-radius:10px;box-shadow:0 3px 7px #1111121a}
+html:not([data-palette]) .tile-title{font-size:13px;font-weight:550}
+html:not([data-palette]) .tile-stats{font-size:10px;line-height:17px;color:var(--muted)}
+html:not([data-palette]) .tile-empty{margin:5px auto;width:84%;height:calc(100% - 10px);border:1px solid var(--line);background:var(--tint);border-radius:10px}
+html:not([data-palette]) .bottom-nav{width:168px;height:60px;bottom:calc(18px + env(safe-area-inset-bottom));padding:5px;grid-template-columns:76px 76px;border:1px solid #fff;border-radius:34px;background:rgba(255,255,255,.92);box-shadow:0 5px 24px #1111120c,0 1px 3px #11111208;backdrop-filter:blur(20px)}
+html:not([data-palette]) .bottom-nav::before{left:-130px;right:-130px;bottom:calc(-19px - env(safe-area-inset-bottom));height:100px;background:linear-gradient(180deg,transparent,#ffffffdd 85%);z-index:-2}
+html:not([data-palette]) .bottom-nav button{border-radius:27px;padding:0;color:var(--ink)}
+html:not([data-palette]) .bottom-nav .icon{width:26px;height:26px}
+html:not([data-palette]) .bottom-nav button.active{color:var(--accent);background:var(--tint-deep)}
+html:not([data-palette]) .bottom-nav button.active::after{display:none}
+html:not([data-palette]) .detail-panel{background:#fff;border-radius:28px 28px 0 0}
+html:not([data-palette]) .detail-panel header button{background:var(--tint)}
+html:not([data-palette]) .detail-hero{background:var(--tint);border-radius:18px}
+html:not([data-palette]) .detail-hero>div:not(.detail-empty){background:#fffffff0;border-radius:12px}
+html:not([data-palette]) .search-sheet{background:#fff;border:1px solid var(--line);box-shadow:0 6px 20px #11111212}
+html:not([data-palette]) .search-sheet label{background:#fff}
+html:not([data-palette]) .empty-home .empty-import{margin-top:12px;background:#fff;color:#111112;border:1px solid var(--line);font-weight:400}
+html:not([data-palette]) .empty-home .empty-sample{margin-top:16px;background:none;color:var(--accent);font-size:12px;font-weight:400}
+@media(max-height:700px){
+  html:not([data-palette]) .home-header{padding-top:calc(16px + env(safe-area-inset-top))}
+  html:not([data-palette]) .project-card{min-height:226px;contain-intrinsic-size:226px}
+  html:not([data-palette]) .preview-track,html:not([data-palette]) .photo-cell,html:not([data-palette]) .summary-media,html:not([data-palette]) .add-media,html:not([data-palette]) .empty-media{height:124px}
+}
+@media(max-width:370px){
+  html:not([data-palette]) .home-header{padding-left:20px;padding-right:20px}
+  html:not([data-palette]) .section-title{padding-left:20px;padding-right:16px}
+  html:not([data-palette]) .project-list{padding-left:20px;padding-right:20px}
+  html:not([data-palette]) .project-list.is-grid{gap:28px 8px}
+  html:not([data-palette]) .tile-title{font-size:12px}
+}
+
+html:not([data-palette]) .empty-home.has-example{height:240px}
+html:not([data-palette]) .empty-home.has-example>div{display:none}
+html:not([data-palette]) .empty-home.has-example .empty-sample{display:none}

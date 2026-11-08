@@ -1,0 +1,36 @@
+/* Product pages inherit the approved homepage's neutral visual language. */
+:root{--bg:#fff;--paper:#fff;--ink:#111112;--muted:#757579;--line:#e6e6e8;--media:#f5f5f6;--brand:#6650ed;--brand-hover:#5742d4;--brand-soft:#f0ecff;--green:#111112;--sage:#f5f5f6;--accent:#6650ed;--accent-soft:#f0ecff;--accent-green:#6650ed;--accent-ink:#111112;--icon-cutout:#fff}
+body,.shell{background:#fff}
+.icon{stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body:has(.product-home-frame){overflow:hidden;background:#f1f1f2}
+.product-home-frame{display:block;width:100%;height:100svh;border:0;background:#fff}
+.brand img,.brand-dot{display:none}
+.primary{background:#111112;border-color:#111112;color:#fff;border-radius:999px}
+.primary:hover{background:#303033}
+.secondary{background:#fff;border-color:var(--line);border-radius:999px}
+.secondary:hover{background:#f5f5f6;border-color:#d7d7da}
+.text-btn{color:var(--ink)}
+.type-option{border-radius:16px}
+.type-option.selected{background:#f5f5f6;border-color:#6650ed}
+.type-option.selected:after{color:#6650ed}
+.segmented{background:#eeeef0;border-radius:999px}
+.segmented button{border-radius:999px}
+.segmented button.active{color:#6650ed;box-shadow:none}
+.photo-frame,.compare-area{border-radius:16px}
+.badge,.photo-number{border-radius:999px;background:#ffffffb3;border-color:#ffffffa6;color:#111112;backdrop-filter:blur(4px)}
+.detail-note{border-color:var(--line)}
+.modal{background:#fff;border-radius:24px}
+.overlay{background:#11111266}
+.about-card{background:#f5f5f6;border-radius:16px}
+.about-card strong{color:#111112}
+.record-actions{background:#fffffff2}
+.switch.on{background:#6650ed}
+.switch.on:after{background:#fff}
+.app-header .privacy-link{color:#757579}
+.shell[data-view=about] .bottom-nav{display:none}
+.shell[data-view=about] main{padding-bottom:35px}
+input:not([type=range]),textarea,select{border-color:#e6e6e8;border-radius:12px;background:#fff}
+input[type=range]::-webkit-slider-thumb{border-color:#fff;background:#6650ed;box-shadow:0 0 0 1px #6650ed}
+input[type=range]::-moz-range-thumb{border-color:#fff;background:#6650ed}
+input[type=range]::-webkit-slider-runnable-track,input[type=range]::-moz-range-track{background:#ddd9f4}
+#toast{background:#111112;color:#fff;box-shadow:0 4px 20px #11111215;border-radius:16px}

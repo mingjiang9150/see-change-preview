@@ -1,0 +1,18 @@
+/* Optional design proposals; the approved default palette remains unchanged. */
+html[data-palette],html[data-palette] body{background:var(--outside)}
+html[data-palette] .phone-shell{background:var(--shell-bg)}
+html[data-palette] .view-switch button[aria-pressed="true"]{color:var(--accent);background:var(--accent-soft)}
+html[data-palette] .bottom-nav button{color:var(--muted)}
+html[data-palette] .bottom-nav button.active{color:var(--accent)}
+html[data-palette] .stack-photo{border-color:var(--photo-frame);box-shadow:0 4px 10px #00000025}
+html[data-palette] .tile-empty{background:var(--tint);border-color:var(--line)}
+html[data-palette] button:focus-visible,html[data-palette] [tabindex]:focus-visible,html[data-palette] input:focus-visible{outline-color:var(--accent)}
+html[data-palette] .detail-panel{background:var(--card)}
+html[data-palette] .detail-grabber{background:var(--muted)}
+html[data-palette] .detail-panel header button{background:var(--tint)}
+html[data-palette] .detail-hero>div:not(.detail-empty){background:var(--card);color:var(--ink)}
+html[data-palette] .detail-panel footer button,html[data-palette] .empty-home button{background:var(--accent);color:var(--accent-ink)}
+html[data-palette] .search-sheet{background:var(--card)}
+html[data-palette] .search-sheet input{color:var(--ink)}
+html[data-palette] .search-sheet input::placeholder{color:var(--muted)}
+html[data-palette] #demo-toast{background:var(--ink);color:var(--card)}
