@@ -1,4 +1,4 @@
-import {generatedProjects} from './generated-projects.js';
+import {generatedProjects,refreshGeneratedPhotoSources} from './generated-projects.js?v=photo-lite-1';
 import {ordered,dayGap} from './core.js';
 import {iconSvg} from './icon-library.js';
 import {applyPalette} from './home-palettes.js';
@@ -35,7 +35,7 @@ async function loadProjects(){
       request.onerror=()=>reject(request.error);
     });
     db.close();
-    return projects;
+    return refreshGeneratedPhotoSources(projects);
   }catch{return [];}
 }
 

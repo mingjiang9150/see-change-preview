@@ -1,6 +1,6 @@
 import {ordered,dayGap,localDateTime,validDate,exifDate} from './core.js';
 import {iconSvg} from './icon-library.js?v=switch-photo-2';
-import {generatedProjects} from './generated-projects.js';
+import {generatedProjects,refreshGeneratedPhotoSources} from './generated-projects.js?v=photo-lite-1';
 import {createDetailPage} from './detail-page.js?v=detail-groups-11';
 const photoFirstDemo=document.documentElement.dataset.detailLayout==='photo-first';
 const generatedDemo=new URLSearchParams(location.search).get('data')!=='real';
@@ -19,7 +19,7 @@ const records=()=>ordered(current()?.records||[]);
 const selected=()=>records()[Math.min(index,records().length-1)];
 const toast=msg=>{const el=$('#toast');el.textContent=msg;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3500)};
 function initDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(productDbName,1);r.onupgradeneeded=()=>r.result.createObjectStore('data');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
-function readDB(){return new Promise((resolve,reject)=>{const r=db.transaction('data').objectStore('data').get('projects');r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);});}
+function readDB(){return new Promise((resolve,reject)=>{const r=db.transaction('data').objectStore('data').get('projects');r.onsuccess=()=>resolve(refreshGeneratedPhotoSources(r.result||[]));r.onerror=()=>reject(r.error);});}
 function hasGeneratedSeed(){return new Promise((resolve,reject)=>{const r=db.transaction('data').objectStore('data').get('generated-seeded');r.onsuccess=()=>resolve(!!r.result);r.onerror=()=>reject(r.error)})}
 function markGeneratedSeed(){return new Promise((resolve,reject)=>{const t=db.transaction('data','readwrite');t.objectStore('data').put(true,'generated-seeded');t.oncomplete=resolve;t.onerror=()=>reject(t.error)})}
 function persist(next){return new Promise((resolve,reject)=>{if(!db){reject(new Error('storage unavailable'));return}const t=db.transaction('data','readwrite');t.objectStore('data').put(next,'projects');t.oncomplete=()=>{projects=next;resolve()};t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error);});}
@@ -42,7 +42,7 @@ function render(){
   const host=$('#app');
   host.dataset.screen=view;
   if(view==='home'){
-    host.innerHTML=`<iframe class="product-home-frame" title="我的变化项目" src="home-swipe-demo.html?v=generated-1&data=real&product=1${generatedDemo?'&db=generated':''}"></iframe>`;
+    host.innerHTML=`<iframe class="product-home-frame" title="我的变化项目" src="home-swipe-demo.html?v=photo-lite-1&data=real&product=1${generatedDemo?'&db=generated':''}"></iframe>`;
     return;
   }
   if(view==='detail'){host.innerHTML=detail();return;}
